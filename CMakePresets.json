@@ -1,0 +1,39 @@
+{
+    "version": 3,
+    "configurePresets": [
+        {
+            "name": "base",
+            "hidden": true,
+            "generator": "Ninja",
+            "cacheVariables": {
+                "CMAKE_TOOLCHAIN_FILE": "${sourceDir}/deps/vcpkg/scripts/buildsystems/vcpkg.cmake"
+            }
+        },
+        {
+            "name": "linux-x64",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/linux-x64",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-linux"
+            }
+        },
+        {
+            "name": "windows-x64",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/windows-x64",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "x64-windows"
+            }
+        },
+        {
+            "name": "android-arm64",
+            "inherits": "base",
+            "binaryDir": "${sourceDir}/build/android-arm64",
+            "cacheVariables": {
+                "VCPKG_TARGET_TRIPLET": "arm64-android",
+                "CMAKE_SYSTEM_NAME": "Android",
+                "ANDROID_NDK": "/path/to/your/android-ndk"
+            }
+        }
+    ]
+}
