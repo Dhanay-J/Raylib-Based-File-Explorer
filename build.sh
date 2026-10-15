@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-$VCPKG_ROOT/vcpkg install 
+# $VCPKG_ROOT/vcpkg install 
 # --x-install-root=deps 
 
 echo "========================================="

@@ -1,22 +1,30 @@
-cmake_minimum_required(VERSION 3.21)
-project(RayguiTest LANGUAGES CXX)
+cmake_minimum_required(VERSION 3.12)
+project(MyRaylibProject CXX)
 
+# Set C++ standard
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(raylib CONFIG REQUIRED)
-find_package(glfw3 CONFIG REQUIRED)
-find_path(RAYGUI_INCLUDE_DIRS NAMES raygui.h REQUIRED)
+# 1. Define paths to your local raylib dependency
+set(RAYLIB_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/raylib/include")
+set(RAYLIB_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/raylib/lib")
 
-add_executable(raygui_test main.cpp)
+# 2. Add your executable
+add_executable(raygui_test main.cpp) # Replace with your actual source files
 
-target_include_directories(raygui_test PRIVATE
-    "${RAYGUI_INCLUDE_DIRS}"
+# 3. Tell CMake where to look for raylib headers
+target_include_directories(raygui_test PRIVATE ${RAYLIB_INCLUDE_DIR})
+
+# 4. Tell CMake where to find the static/shared library files
+target_link_directories(raygui_test PRIVATE ${RAYLIB_LIB_DIR})
+
+# 5. Link raylib and its required Linux system dependencies
+target_link_libraries(raygui_test PRIVATE 
+    raylib 
+    GL 
+    m 
+    pthread 
+    dl 
+    rt 
+    X11
 )
-
-target_include_directories(raygui_test PRIVATE
-    "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-linux/include"
-)
-
-
-target_link_libraries(raygui_test PRIVATE raylib glfw)
