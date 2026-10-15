@@ -1,23 +1,18 @@
-
 #include "raylib.h"
-#include "raygui.h"
 
-int main() {
-	InitWindow(800, 450, "raygui - Hello World");
-	SetTargetFPS(60);
+int main()
+{
+    InitWindow(800, 450, "Raylib Rendering Test");
+    SetTargetFPS(60);
 
-	while (!WindowShouldClose()) {
-		BeginDrawing();
-		ClearBackground(RAYWHITE);
+    while (!WindowShouldClose())
+    {
+        BeginDrawing();
+        ClearBackground(RAYWHITE);
+        DrawText("Raylib rendering works!", 100, 100, 30, RED);
+        EndDrawing();
+    }
 
-		GuiLabel((Rectangle){300, 170, 200, 30}, "Hello, raygui!");
-		if (GuiButton((Rectangle){325, 220, 150, 40}, "OK")) {
-			// The button is intentionally non-functional.
-		}
-
-		EndDrawing();
-	}
-
-	CloseWindow();
-	return 0;
+    CloseWindow();
+    return 0;
 }

@@ -1,15 +1,22 @@
 cmake_minimum_required(VERSION 3.21)
-project(RayguiTest CXX)
+project(RayguiTest LANGUAGES CXX)
 
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-# 1. Locate dependencies via vcpkg automated targets
 find_package(raylib CONFIG REQUIRED)
-find_package(raygui CONFIG REQUIRED)
+find_package(glfw3 CONFIG REQUIRED)
+find_path(RAYGUI_INCLUDE_DIRS NAMES raygui.h REQUIRED)
 
-# 2. Define executable
 add_executable(raygui_test main.cpp)
 
-# 3. Link targets (vcpkg automatically resolves libraries/include directories)
-target_link_libraries(raygui_test PRIVATE raylib raygui)
+target_include_directories(raygui_test PRIVATE
+    "${RAYGUI_INCLUDE_DIRS}"
+)
+
+target_include_directories(raygui_test PRIVATE
+    "${CMAKE_CURRENT_SOURCE_DIR}/vcpkg_installed/x64-linux/include"
+)
+
+
+target_link_libraries(raygui_test PRIVATE raylib glfw)
