@@ -69,6 +69,7 @@ int main()
     // Base 1: Canvas/Background color
     // Base 2: Brand/Accent color
     ThemeManager theme(Color{245, 246, 250, 255}, Color{41, 128, 185, 255}, 15);
+    theme.LoadCustomFont("assets/Roboto-Regular.ttf", 18);
     theme.ApplyTheme();
 
     FSBrowser browser;

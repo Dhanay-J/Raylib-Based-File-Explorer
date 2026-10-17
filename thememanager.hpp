@@ -5,13 +5,12 @@
 #include "raygui.h"
 #include <string>
 #include <algorithm>
-#include <cmath>
 
 struct FontProperties
 {
-    std::string fontPath = ""; // Path to custom TTF/OTF, or empty for default
-    int size = 15;
-    int spacing = 1;
+    std::string fontPath = "";
+    int size = 18;
+    int spacing = 0;
     Font fontHandle = {0};
     bool isLoaded = false;
 };
@@ -19,13 +18,11 @@ struct FontProperties
 class ThemeManager
 {
 public:
-    // Base Colors
-    Color basePrimary;   // e.g., Background/Neutral base
-    Color baseSecondary; // e.g., Accent/Brand color
-
+    Color basePrimary;
+    Color baseSecondary;
     FontProperties fontProps;
 
-    ThemeManager(Color primary, Color secondary, int fontSize = 15)
+    ThemeManager(Color primary, Color secondary, int fontSize = 18)
         : basePrimary(primary), baseSecondary(secondary)
     {
         fontProps.size = fontSize;
@@ -36,14 +33,7 @@ public:
         UnloadCustomFont();
     }
 
-    void SetBaseColors(Color primary, Color secondary)
-    {
-        basePrimary = primary;
-        baseSecondary = secondary;
-        ApplyTheme();
-    }
-
-    void SetFont(const std::string &path, int size, int spacing = 1)
+    void LoadCustomFont(const std::string &path, int size, int spacing = 0)
     {
         UnloadCustomFont();
         fontProps.fontPath = path;
@@ -52,7 +42,12 @@ public:
 
         if (!path.empty() && FileExists(path.c_str()))
         {
+            // Load font at the target size for sharp rendering (no pixelation)
             fontProps.fontHandle = LoadFontEx(path.c_str(), size, nullptr, 0);
+
+            // Set bilinear filtering to keep edges smooth
+            SetTextureFilter(fontProps.fontHandle.texture, TEXTURE_FILTER_BILINEAR);
+
             fontProps.isLoaded = true;
             GuiSetFont(fontProps.fontHandle);
         }
@@ -61,27 +56,22 @@ public:
             GuiSetFont(GetFontDefault());
             fontProps.isLoaded = false;
         }
+
         GuiSetStyle(DEFAULT, TEXT_SIZE, fontProps.size);
         GuiSetStyle(DEFAULT, TEXT_SPACING, fontProps.spacing);
     }
 
-    void SetFontSize(int size)
+    void SetBaseColors(Color primary, Color secondary)
     {
-        fontProps.size = size;
-        GuiSetStyle(DEFAULT, TEXT_SIZE, size);
+        basePrimary = primary;
+        baseSecondary = secondary;
+        ApplyTheme();
     }
 
-    // ----------------------------------------------------
-    // Color Derivations
-    // ----------------------------------------------------
-    Color GetBackgroundColor() const
-    {
-        return basePrimary;
-    }
+    Color GetBackgroundColor() const { return basePrimary; }
 
     Color GetSurfaceColor() const
     {
-        // Subtle offset from background
         return IsDark(basePrimary) ? Lighten(basePrimary, 0.08f) : Darken(basePrimary, 0.06f);
     }
 
@@ -100,22 +90,12 @@ public:
         return IsDark(basePrimary) ? Color{150, 150, 150, 255} : Color{120, 120, 120, 255};
     }
 
-    Color GetAccentColor() const
-    {
-        return baseSecondary;
-    }
+    Color GetAccentColor() const { return baseSecondary; }
 
-    Color GetAccentHover() const
-    {
-        return Lighten(baseSecondary, 0.12f);
-    }
+    Color GetAccentHover() const { return Lighten(baseSecondary, 0.12f); }
 
-    Color GetAccentPressed() const
-    {
-        return Darken(baseSecondary, 0.15f);
-    }
+    Color GetAccentPressed() const { return Darken(baseSecondary, 0.15f); }
 
-    // Apply computed palette to Raygui global styles
     void ApplyTheme()
     {
         Color bg = GetBackgroundColor();
@@ -126,26 +106,21 @@ public:
         Color accentHover = GetAccentHover();
         Color accentActive = GetAccentPressed();
 
-        // Canvas & Window
         GuiSetStyle(DEFAULT, BACKGROUND_COLOR, ColorToInt(bg));
         GuiSetStyle(DEFAULT, LINE_COLOR, ColorToInt(border));
         GuiSetStyle(DEFAULT, TEXT_COLOR_NORMAL, ColorToInt(text));
 
-        // Default Control States
         GuiSetStyle(DEFAULT, BASE_COLOR_NORMAL, ColorToInt(surface));
         GuiSetStyle(DEFAULT, BORDER_COLOR_NORMAL, ColorToInt(border));
 
-        // Focused / Hover
         GuiSetStyle(DEFAULT, BASE_COLOR_FOCUSED, ColorToInt(accentHover));
         GuiSetStyle(DEFAULT, BORDER_COLOR_FOCUSED, ColorToInt(accent));
         GuiSetStyle(DEFAULT, TEXT_COLOR_FOCUSED, ColorToInt(IsDark(accentHover) ? WHITE : BLACK));
 
-        // Pressed / Active
         GuiSetStyle(DEFAULT, BASE_COLOR_PRESSED, ColorToInt(accentActive));
         GuiSetStyle(DEFAULT, BORDER_COLOR_PRESSED, ColorToInt(accent));
         GuiSetStyle(DEFAULT, TEXT_COLOR_PRESSED, ColorToInt(IsDark(accentActive) ? WHITE : BLACK));
 
-        // Font Style
         GuiSetStyle(DEFAULT, TEXT_SIZE, fontProps.size);
         GuiSetStyle(DEFAULT, TEXT_SPACING, fontProps.spacing);
     }
@@ -160,7 +135,6 @@ private:
         }
     }
 
-    // Luminance check
     static bool IsDark(Color c)
     {
         float lum = (0.299f * c.r + 0.587f * c.g + 0.114f * c.b) / 255.0f;
