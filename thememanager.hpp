@@ -23,7 +23,7 @@ public:
     FontProperties fontProps;
 
     ThemeManager(Color primary, Color secondary, int fontSize = 18)
-        : basePrimary(primary), baseSecondary(secondary)
+            : basePrimary(primary), baseSecondary(secondary)
     {
         fontProps.size = fontSize;
     }
@@ -33,6 +33,45 @@ public:
         UnloadCustomFont();
     }
 
+    // --- NEW: Load font from memory (for Android assets / embedded fonts) ---
+    void LoadCustomFontFromMemory(const std::string &fileType, const unsigned char *data, int dataSize, int size, int spacing = 0)
+    {
+        UnloadCustomFont();
+        fontProps.fontPath = "memory:" + fileType; // Marker for debugging
+        fontProps.size = size;
+        fontProps.spacing = spacing;
+
+        if (data != nullptr && dataSize > 0)
+        {
+            // Load font from memory buffer
+            fontProps.fontHandle = LoadFontFromMemory(fileType.c_str(), data, dataSize, size, nullptr, 0);
+
+            if (fontProps.fontHandle.texture.id != 0)
+            {
+                // Set bilinear filtering to keep edges smooth
+                SetTextureFilter(fontProps.fontHandle.texture, TEXTURE_FILTER_BILINEAR);
+
+                fontProps.isLoaded = true;
+                GuiSetFont(fontProps.fontHandle);
+            }
+            else
+            {
+                // Fallback if memory load fails
+                GuiSetFont(GetFontDefault());
+                fontProps.isLoaded = false;
+            }
+        }
+        else
+        {
+            GuiSetFont(GetFontDefault());
+            fontProps.isLoaded = false;
+        }
+
+        GuiSetStyle(DEFAULT, TEXT_SIZE, fontProps.size);
+        GuiSetStyle(DEFAULT, TEXT_SPACING, fontProps.spacing);
+    }
+
+    // --- Existing: Load font from file path ---
     void LoadCustomFont(const std::string &path, int size, int spacing = 0)
     {
         UnloadCustomFont();
@@ -144,19 +183,19 @@ private:
     static Color Lighten(Color c, float factor)
     {
         return Color{
-            (unsigned char)std::min(255.0f, c.r + (255 - c.r) * factor),
-            (unsigned char)std::min(255.0f, c.g + (255 - c.g) * factor),
-            (unsigned char)std::min(255.0f, c.b + (255 - c.b) * factor),
-            c.a};
+                (unsigned char)std::min(255.0f, c.r + (255 - c.r) * factor),
+                (unsigned char)std::min(255.0f, c.g + (255 - c.g) * factor),
+                (unsigned char)std::min(255.0f, c.b + (255 - c.b) * factor),
+                c.a};
     }
 
     static Color Darken(Color c, float factor)
     {
         return Color{
-            (unsigned char)std::max(0.0f, c.r * (1.0f - factor)),
-            (unsigned char)std::max(0.0f, c.g * (1.0f - factor)),
-            (unsigned char)std::max(0.0f, c.b * (1.0f - factor)),
-            c.a};
+                (unsigned char)std::max(0.0f, c.r * (1.0f - factor)),
+                (unsigned char)std::max(0.0f, c.g * (1.0f - factor)),
+                (unsigned char)std::max(0.0f, c.b * (1.0f - factor)),
+                c.a};
     }
 };
 
