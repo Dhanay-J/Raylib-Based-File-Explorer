@@ -11,7 +11,7 @@ set(RAYLIB_LIB_DIR "${CMAKE_CURRENT_SOURCE_DIR}/deps/raylib/lib")
 set(ASSETS "${CMAKE_CURRENT_SOURCE_DIR}/assets")
 
 # 2. Add your executable
-add_executable(raygui_test main.cpp ${ASSETS}/roboto_font.h)
+add_executable(raygui_test main.cpp ${ASSETS}/roboto_font.h progressbar.cpp progressbar.hpp)
 
 # 3. Tell CMake where to look for raylib headers
 target_include_directories(raygui_test PRIVATE ${RAYLIB_INCLUDE_DIR})
